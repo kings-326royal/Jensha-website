@@ -131,13 +131,24 @@ GitHub runs it through `.github/workflows/update-metrics.yml`:
 
 | Source | What you need |
 | --- | --- |
-| Google Scholar | The Google Scholar profile ID (the `user=` part of the profile address). It is **not set yet**: add it in **Edit profile details** and publish. |
+| Google Scholar | Profile `6huflbcAAAAJ` is set (https://scholar.google.com/citations?user=6huflbcAAAAJ). Refreshed from your Mac; see below. |
 | Scopus | Author ID 57189850005 is set. Add a free API key from https://dev.elsevier.com ("I want an API key") under **Settings → Secrets and variables → Actions → New repository secret**, named `SCOPUS_API_KEY`. |
 | Web of Science | Researcher ID AAT-4668-2021 is set. Add a free "Web of Science Starter API" key from https://developer.clarivate.com as a repository secret named `WOS_API_KEY`. |
 
-Until a source is connected, it shows "Not connected yet" on the website. Until any source returns figures, the headline tiles use the manual values in **Edit profile details**: currently 17 citations and h-index 2, as per Web of Science (Publons). If one fetch fails (Google Scholar sometimes blocks automated visits), the site keeps the previous figures and the next weekly run tries again.
+Until a source is connected, it shows "Not connected yet" on the website. If a fetch fails, the site keeps the previous figures. The manual citation and h-index values in **Edit profile details** are used only if no source has ever returned figures.
 
 The page uses the first available source for the headline citation and h-index tiles, in this order: Google Scholar, Scopus, Web of Science.
+
+### Google Scholar is refreshed from your Mac
+
+Google Scholar refuses requests from GitHub's servers (the weekly GitHub job gets "HTTP 403" and keeps the previous figures), so the Scholar figures are fetched from your Mac by `~/Library/Application Support/ProfileSites/update-scholar-metrics.sh`. It refreshes both profile sites (King and Jensha) and pushes `metrics.js` only when a figure has changed; the live site updates about a minute later.
+
+- Refresh now: `bash ~/Library/Application\ Support/ProfileSites/update-scholar-metrics.sh`
+- Daily refresh (09:30, or when the Mac next wakes up): load `~/Library/LaunchAgents/com.kings326royal.scholar-metrics.plist` with `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.kings326royal.scholar-metrics.plist`
+- Stop the daily refresh: `launchctl bootout gui/$(id -u)/com.kings326royal.scholar-metrics`, then delete the plist file.
+- Log of each run: `~/Library/Application Support/ProfileSites/update.log`
+
+The Mac must be switched on (asleep is fine). The weekly GitHub job still handles Scopus and Web of Science once their API keys are added.
 
 ## Notes
 
